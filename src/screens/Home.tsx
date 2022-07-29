@@ -17,6 +17,8 @@ import { Loading } from '../components/Loading';
 export function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState<'open' | 'closed'>('open');
+  const [filterByUser, setFilterByUser] = useState<'all' | 'current'>('current');
+
   const [orders, setOrders] = useState<OrderProps[]>([]);
 
   const { colors } = useTheme();
@@ -42,14 +44,17 @@ export function Home() {
   useEffect(() => {
     setIsLoading(true);
 
+    const { uid } = auth().currentUser;
+
     const subscriber = firestore()
       .collection('orders')
       .where('status', '==', selectedStatus)
       .onSnapshot((snapshot) => {
-        const data = snapshot.docs.map((doc) => {
-          const { patrimony, description, status, created_at } = doc.data();
+        const dataFromDB = snapshot.docs.map((doc) => {
+          const { uid, patrimony, description, status, created_at } = doc.data();
 
           return {
+            uid,
             id: doc.id,
             patrimony,
             description,
@@ -58,12 +63,15 @@ export function Home() {
           };
         });
 
+        const data =
+          filterByUser === 'all' ? dataFromDB : dataFromDB.filter((order) => order.uid === uid);
+
         setOrders(data);
         setIsLoading(false);
       });
 
     return subscriber;
-  }, [selectedStatus]);
+  }, [selectedStatus, filterByUser]);
 
   return (
     <VStack flex={1} pb={6} bg="gray.700">
@@ -82,22 +90,41 @@ export function Home() {
       </HStack>
 
       <VStack flex={1} px={6}>
-        <HStack w="full" mt={8} mb={4} justifyContent="space-between" alignItems="center">
+        <HStack w="full" mt={6} mb={4} justifyContent="space-between" alignItems="center">
           <Heading color="gray.100">Solicitações</Heading>
 
           <Text color="gray.200">{orders.length}</Text>
         </HStack>
 
+        <HStack space={3} mb={4}>
+          <Filter
+            title="minhas"
+            type="user"
+            value={filterByUser}
+            isActive={filterByUser === 'current'}
+            onPress={() => setFilterByUser('current')}
+          />
+          <Filter
+            title="todas"
+            type="user"
+            value={filterByUser}
+            isActive={filterByUser === 'all'}
+            onPress={() => setFilterByUser('all')}
+          />
+        </HStack>
+
         <HStack space={3} mb={8}>
           <Filter
             title="em andamento"
-            type="open"
+            type="status"
+            value={selectedStatus}
             isActive={selectedStatus === 'open'}
             onPress={() => setSelectedStatus('open')}
           />
           <Filter
-            title="finalizados"
-            type="closed"
+            title="finalizadas"
+            type="status"
+            value={selectedStatus}
             onPress={() => setSelectedStatus('closed')}
             isActive={selectedStatus === 'closed'}
           />

@@ -1,15 +1,21 @@
 import { Text, Button, IButtonProps, useTheme } from 'native-base';
 
 type Props = IButtonProps & {
-  title: string
-  type: 'open' | 'closed'
-  isActive?: boolean
-}
+  title: string;
+  type: 'status' | 'user';
+  value: 'open' | 'closed' | 'all' | 'current';
+  isActive?: boolean;
+};
 
-export function Filter({ isActive = false, title, type, ...rest }: Props) {
-  const { colors } = useTheme()
+export function Filter({ isActive = false, title, value, type, ...rest }: Props) {
+  const { colors } = useTheme();
 
-  const colorType = type === 'open' ? colors.secondary[700] : colors.green[300]
+  const colorType =
+    type === 'user'
+      ? colors.primary[700]
+      : value === 'open'
+      ? colors.secondary[700]
+      : colors.green[300];
 
   return (
     <Button
@@ -21,7 +27,9 @@ export function Filter({ isActive = false, title, type, ...rest }: Props) {
       size="sm"
       {...rest}
     >
-      <Text color={isActive ? colorType : "gray.300"} fontSize="xs" textTransform="uppercase">{title}</Text>
+      <Text color={isActive ? colorType : 'gray.300'} fontSize="xs" textTransform="uppercase">
+        {title}
+      </Text>
     </Button>
   );
 }

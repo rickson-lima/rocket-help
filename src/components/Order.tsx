@@ -12,6 +12,7 @@ import { CircleWavyCheck, ClockAfternoon, Hourglass } from 'phosphor-react-nativ
 
 export type OrderProps = {
   id: string;
+  uid: string;
   patrimony: string;
   when: string;
   status: 'open' | 'closed';

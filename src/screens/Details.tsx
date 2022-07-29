@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Box, HStack, ScrollView, Text, useTheme, VStack } from 'native-base';
 import { CircleWavyCheck, ClipboardText, DesktopTower, Hourglass } from 'phosphor-react-native';
 
+import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { OrderFirestoreDTO } from '../DTOs/OrderFirestoreDTO';
 import { dateFormat } from '../utils/firestoreDateFormat';
@@ -68,8 +69,10 @@ export function Details() {
         const { patrimony, description, status, created_at, closed_at, solution } = doc.data();
 
         const closed = closed_at ? dateFormat(closed_at) : null;
+        const { uid } = auth().currentUser;
 
         setOrder({
+          uid,
           id: doc.id,
           patrimony,
           description,

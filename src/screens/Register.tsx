@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Alert } from 'react-native';
 import { VStack } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
+import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
 import { Header } from '../components/Header';
@@ -20,11 +21,14 @@ export function Register() {
       return Alert.alert('Registrar', 'Preencha todos os campos');
     }
 
+    const { uid } = auth().currentUser;
+
     setIsLoading(true);
 
     firestore()
       .collection('orders')
       .add({
+        uid,
         patrimony,
         description,
         status: 'open',
