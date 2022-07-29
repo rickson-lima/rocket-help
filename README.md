@@ -10,8 +10,6 @@
       <a href="#feats">Features</a> • 
    </p>
    
-   <img src="https://img.shields.io/badge/license-MIT-brightgreen">
-
    <img src="./.github/preview.gif" width="300" height="500">
 </div>
 
