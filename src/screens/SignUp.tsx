@@ -10,27 +10,36 @@ import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { useNavigation } from '@react-navigation/native';
 
-export function SignIn() {
+export function SignUp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const { colors } = useTheme();
   const navigation = useNavigation();
 
-  function handleGoSignUp() {
-    navigation.navigate('signUp');
+  function handleGoSignIn() {
+    navigation.navigate('signIn');
   }
 
-  function handleSignIn() {
-    if (!email || !password) {
-      return Alert.alert('Entrar', 'Informe email e senha');
+  function handleSignUp() {
+    if (!email || !password || !confirmPassword) {
+      return Alert.alert('Cadastrar', 'Preencha todos os campos');
+    }
+
+    if (password !== confirmPassword) {
+      return Alert.alert('Cadastrar', 'As senhas não conferem');
+    }
+
+    if (password.length < 6) {
+      return Alert.alert('Cadastrar', 'A senha deve possuir pelo menos 6 caracteres.');
     }
 
     setIsLoading(true);
 
     auth()
-      .signInWithEmailAndPassword(email, password)
+      .createUserWithEmailAndPassword(email, password)
       .then((response) => console.log(response))
       .catch((error) => {
         console.log(error);
@@ -40,11 +49,7 @@ export function SignIn() {
           return Alert.alert('Entrar', 'Email inválido.');
         }
 
-        if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-          return Alert.alert('Entrar', 'Email ou senha inválida.');
-        }
-
-        return Alert.alert('Entrar', 'Não foi possível acessar.');
+        return Alert.alert('Cadastrar', 'Não foi possível cadastrar.');
       });
   }
 
@@ -53,7 +58,7 @@ export function SignIn() {
       <Logo />
 
       <Heading color="gray.100" mt={16} mb={6} fontSize="xl">
-        Acesse sua conta
+        Criar uma conta
       </Heading>
 
       <Input
@@ -63,15 +68,22 @@ export function SignIn() {
         InputLeftElement={<Icon as={<Envelope color={colors.gray[300]} />} ml={4} />}
       />
       <Input
-        mb={8}
+        mb={4}
         placeholder="Senha"
         InputLeftElement={<Icon as={<Key color={colors.gray[300]} />} ml={4} />}
         secureTextEntry
         onChangeText={setPassword}
       />
+      <Input
+        mb={8}
+        placeholder="Confirme a senha"
+        InputLeftElement={<Icon as={<Key color={colors.gray[300]} />} ml={4} />}
+        secureTextEntry
+        onChangeText={setConfirmPassword}
+      />
 
-      <Button w="full" title="Entrar" onPress={handleSignIn} isLoading={isLoading} />
-      <Button w="full" bg={colors.gray[500]} title="Cadastrar" onPress={handleGoSignUp} mt={4} />
+      <Button w="full" title="Cadastrar" onPress={handleSignUp} isLoading={isLoading} />
+      <Button w="full" bg={colors.gray[500]} title="Entrar" onPress={handleGoSignIn} mt={4} />
     </VStack>
   );
 }
