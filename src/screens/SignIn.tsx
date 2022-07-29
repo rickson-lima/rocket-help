@@ -52,7 +52,7 @@ export function SignIn() {
     <VStack flex={1} alignItems="center" bg="gray.600" px={8} pt={24}>
       <Logo />
 
-      <Heading color="gray.100" mt={16} mb={6} fontSize="xl">
+      <Heading color="gray.100" mt={24} mb={6} fontSize="xl">
         Acesse sua conta
       </Heading>
 
