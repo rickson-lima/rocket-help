@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import { VStack } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
@@ -8,6 +8,8 @@ import firestore from '@react-native-firebase/firestore';
 import { Header } from '../components/Header';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
+import useIsOffline from '../hooks/useNetwork';
+import { dbWritePromise, docSnapshotPromise } from '../utils/test';
 
 export function Register() {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,8 +17,10 @@ export function Register() {
   const [description, setDescription] = useState('');
 
   const navigation = useNavigation();
+  const collectionRef = firestore().collection('orders');
+  const isOffline = useIsOffline();
 
-  function handleNewOrderRegister() {
+  async function handleNewOrderRegister() {
     if (!patrimony || !description) {
       return Alert.alert('Registrar', 'Preencha todos os campos');
     }
@@ -25,24 +29,30 @@ export function Register() {
 
     setIsLoading(true);
 
-    firestore()
-      .collection('orders')
-      .add({
-        uid,
-        patrimony,
-        description,
-        status: 'open',
-        created_at: firestore.FieldValue.serverTimestamp(),
-      })
-      .then(() => {
-        Alert.alert('Solicitação', 'Solicitação registrada com sucesso.');
-        navigation.goBack();
-      })
-      .catch((error) => {
-        console.log(error);
-        setIsLoading(false);
-        return Alert.alert('Solicitação', 'Não foi possível registrar o pedido.');
-      });
+    try {
+      const orderRef = collectionRef.doc(Math.random().toString());
+      //update org doc
+      await dbWritePromise(
+        orderRef.set({
+          uid,
+          patrimony,
+          description,
+          status: 'open',
+          created_at: firestore.FieldValue.serverTimestamp(),
+        }),
+      );
+      // wait for this updated doc to be written to local cache, then we can get the updated org
+      const createdDocRef = await docSnapshotPromise(orderRef);
+      const data = createdDocRef.data();
+      console.log(data); // outputs the new and improved nam
+
+      navigation.goBack();
+    } catch (error) {
+      console.log(error);
+      return Alert.alert('Solicitação', 'Não foi possível registrar o pedido.');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
